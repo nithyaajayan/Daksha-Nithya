@@ -1,0 +1,80 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from astropy.coordinates import SkyCoord
+import astropy.units as u
+
+observed_data = pd.read_csv("facecounts.csv",header=None,sep=' ')
+observed_normal = 2780
+noise = 2500
+
+chi_squared_list = []
+
+source = observed_data - noise
+expected_normal = observed_normal - noise
+
+panel_orientations_list = panelorientlist = [[0, 0], [45, 0], [45, 90], [45, 180], [45, 270], [90, 0], [90, 45], [90, 90], [90, 135], [90, 180], [90, 225], [90, 270], [90, 315]]
+
+#converting source df into separate list of data for each panel
+panel_source = [source.iloc[:,i].to_numpy() for i in range(source.shape[1])]
+
+#orientation list to array
+panel_orient = np.array(panel_orientations_list)
+
+#Sky coordinates
+
+theta_vals = np.linspace(0,90,100)
+phi_vals = np.linspace(0,90,100)
+
+theta_grid, phi_grid = np.meshgrid(theta_vals,phi_vals)
+
+dec_grid = 90-theta_grid
+ra_grid = phi_grid
+
+sky_coords = SkyCoord(ra=ra_grid*u.deg, dec=dec_grid*u.deg)
+
+#Panel Coordinates and Chi Square
+
+for i,(theta,phi) in enumerate(panel_orient):
+    panel_dec = 90-theta
+    panel_ra = phi
+
+    panel_coords = SkyCoord(ra=panel_dec*u.deg,dec=panel_dec*u.deg)
+
+    gamma = sky_coords.separation(panel_coords).deg
+    cos_gamma = np.cos(np.radians(gamma))
+    cos_gamma[cos_gamma<0] = 0
+
+    expected_values = expected_normal * cos_gamma
+    observed_values = panel_source[i]
+
+    chi_sq = np.zeros_like(expected_values)
+
+    for obs in observed_values:
+        with np.errstate(divide='ignore',invalid='ignore'):
+            chi_sq += np.where(expected_values>0, ((obs-expected_values)**2)/expected_values, np.nan)
+            chi_sq = np.where(np.isfinite(chi_sq) & (expected_values>0), chi_sq,np.inf)
+
+    chi_squared_list.append(chi_sq)
+
+chi_squared_stack = np.stack(chi_squared_list, axis=0)
+final_chi_square = np.min(chi_squared_stack, axis=0)
+
+#plotting
+
+fig=plt.figure()
+ax=fig.add_subplot(111, projection = 'mollweide')
+
+lon=np.linspace(0,np.pi/2,100)
+lat=np.linspace(0,np.pi/2,100)
+
+Lon, Lat = np.meshgrid(lon,lat)
+
+c=ax.pcolormesh(Lon,Lat,final_chi_square,cmap='YlOrRd',shading='auto')
+plt.colorbar(c, ax=ax, orientation = 'horizontal',label='chi_squared')
+
+ax.set_title('Chi-Sqaure Distribution')
+ax.grid(True)
+plt.tight_layout()
+plt.show()
+
