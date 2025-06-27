@@ -38,6 +38,7 @@ def observedcounts(GRB_RA,GRB_Dec,normalflux,noise):
 def chi2localisation(counts_on_17_panels,NSIDE,panels,noise):
     import numpy as np
     from astropy.coordinates import SkyCoord
+    import astropy.units as u
     import healpy as hp
 
 
@@ -112,6 +113,7 @@ def chi2localisation(counts_on_17_panels,NSIDE,panels,noise):
 
 def vectorlocalisation(counts_from_17_panels,noise):
     import numpy as np
+    import healpy as hp
     n=3
     all_sources = counts_from_17_panels - noise
     top_indices = np.argsort(-all_sources)[:n]
