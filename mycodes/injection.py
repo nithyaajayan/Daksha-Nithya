@@ -6,7 +6,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from localisation.locfunction import isotropicpoints, observedcounts
 
-
 def main(sources,injections,noise,flux,outfile):
     GRB_ra_array,GRB_dec_array = isotropicpoints(sources)
     injection_dict={}
