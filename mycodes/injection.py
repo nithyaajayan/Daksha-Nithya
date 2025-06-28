@@ -12,7 +12,7 @@ if __name__ == "__main__":
     parser.add_argument("--injections",type=int,required=True,help="Number of injections")
     parser.add_argument("--noise",type=float,default=3000,help="Background noise")
     parser.add_argument("--flux", type=float,required=True,help="Normal flux")
-    parser.add_argument("--outfile",type=str,default="injectiondataset.npz")
+    parser.add_argument("--outfile",type=str,required=True)
     args = parser.parse_args()
     
     GRB_ra_array,GRB_dec_array = isotropicpoints(args.sources)
