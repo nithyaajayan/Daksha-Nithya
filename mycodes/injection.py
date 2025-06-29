@@ -23,4 +23,8 @@ if __name__ == "__main__":
             counts = observedcounts(GRB_ra,GRB_dec,args.flux,args.noise)
             injection_array[i,j,:]=counts
 
-    np.savez(args.outfile, ra=GRB_ra_array,dec=GRB_dec_array,counts=injection_array)
+    np.savez(args.outfile, ra=GRB_ra_array,dec=GRB_dec_array,counts=injection_array,
+             metadata = dict(sources=args.sources,
+                             injections=args.injections,
+                             noise=args.noise,
+                             flux=args.flux))
