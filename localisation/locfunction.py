@@ -192,3 +192,11 @@ def plotdistribution(data1, data2, label1, label2, true_val, title, xlabel,bins)
     plt.show()
 
     return fig
+
+def band_counts(E, A, alpha, beta, Ep):
+    import numpy as np
+    Eb = (alpha - beta) *Ep
+        
+    return np.where(
+        E < Eb, A * (E / 100)**alpha * np.exp(-E / Ep),
+        A * ((Eb / 100)**(alpha - beta)) * np.exp(beta - alpha) * (E / 100)**beta)
