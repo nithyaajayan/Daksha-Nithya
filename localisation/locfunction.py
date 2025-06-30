@@ -193,7 +193,7 @@ def plotdistribution(data1, data2, label1, label2, true_val, title, xlabel,bins)
 
     return fig
 
-def band_counts(E, A, alpha, beta, Ep):
+def bandcounts(E, A, alpha, beta, Ep):
     import numpy as np
     Eb = (alpha - beta) *Ep
         
