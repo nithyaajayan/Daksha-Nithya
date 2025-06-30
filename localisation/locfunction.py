@@ -1,5 +1,11 @@
+import numpy as np
+import astropy.units as u
+from astropy.coordinates import SkyCoord
+import healpy as hp
+from scipy.stats import norm
+import matplotlib.pyplot as plt
+
 def isotropicpoints(n):
-    import numpy as np
     x = np.random.uniform(0,1,n)
     theta = np.arccos(x)
     phi = np.random.uniform(0, 2 * np.pi, n)
@@ -11,9 +17,6 @@ def isotropicpoints(n):
 
 
 def observedcounts(GRB_RA,GRB_Dec,normalflux,noise):
-    import numpy as np
-    import astropy.units as u
-    from astropy.coordinates import SkyCoord
 
     panel_orient_list = np.array([[0, 0], [45, 0], [45, 90], [45, 180], [45, 270], 
     [90, 0], [90, 45], [90, 90], [90, 135], 
@@ -36,11 +39,6 @@ def observedcounts(GRB_RA,GRB_Dec,normalflux,noise):
 
 
 def chi2localisation(counts_on_17_panels,NSIDE,panels,noise):
-    import numpy as np
-    from astropy.coordinates import SkyCoord
-    import astropy.units as u
-    import healpy as hp
-
 
     panel_orient_list = [[0, 0], [45, 0], [45, 90], [45, 180], [45, 270], 
     [90, 0], [90, 45], [90, 90], [90, 135], [90, 180], [90, 225], [90, 270], [90, 315], 
@@ -112,8 +110,7 @@ def chi2localisation(counts_on_17_panels,NSIDE,panels,noise):
 
 
 def vectorlocalisation(counts_from_17_panels,noise):
-    import numpy as np
-    import healpy as hp
+
     n=3
     all_sources = counts_from_17_panels - noise
     top_indices = np.argsort(-all_sources)[:n]
@@ -162,11 +159,8 @@ def vectorlocalisation(counts_from_17_panels,noise):
 
     return ra, dec, np.linalg.norm(r_vec)
 
-from scipy.stats import norm
-import matplotlib.pyplot as plt
 
 def plotdistribution(data1, data2, label1, label2, true_val, title, xlabel,bins):
-    import numpy as np
     fig, ax = plt.subplots(figsize=(8, 4))
 
     ax.hist(data1, bins=bins, histtype='step', linewidth=2, label=label1, color='skyblue', density=True)
@@ -193,10 +187,10 @@ def plotdistribution(data1, data2, label1, label2, true_val, title, xlabel,bins)
 
     return fig
 
-def bandcounts(E, A, alpha, beta, Ep):
-    import numpy as np
-    Eb = (alpha - beta) *Ep
+def band_counts(E, A, alpha, beta, Ep):
+
+    E0= Ep/(alpha+2)
         
     return np.where(
-        E < Eb, A * (E / 100)**alpha * np.exp(-E / Ep),
-        A * ((Eb / 100)**(alpha - beta)) * np.exp(beta - alpha) * (E / 100)**beta)
+        E < (alpha-beta)*E0, A * (E / 100)**alpha * np.exp(-E / E0),
+        A * (((alpha-beta)*E0 / 100)**(alpha - beta)) * np.exp(beta - alpha) * (E / 100)**beta)
