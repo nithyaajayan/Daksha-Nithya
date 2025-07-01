@@ -13,7 +13,6 @@ if __name__ == '__main__':
     parser.add_argument("--noise",type=int,default=3000)
     parser.add_argument("--NSIDE",type=int,default=128)
     parser.add_argument("--panels",type=int,default=5)
-    parser.add_argument("--result_file",type=str,required=True)
     args = parser.parse_args()
 
     file = np.load(args.injectionfile, allow_pickle=True)
@@ -67,5 +66,4 @@ if __name__ == '__main__':
                     Ep=metadata['Ep'],
                     noise=args.noise,
                     NSIDE=args.NSIDE,
-                    faces=args.faces,
-                    cores=args.processes))   
+                    faces=args.faces))   
