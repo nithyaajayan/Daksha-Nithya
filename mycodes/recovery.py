@@ -12,7 +12,7 @@ if __name__ == '__main__':
     parser.add_argument("--injectionfile",type=str,required=True)
     parser.add_argument("--noise",type=int,default=3000)
     parser.add_argument("--NSIDE",type=int,default=128)
-    parser.add_argument("--panels",type=int,default=5)
+    parser.add_argument("--faces",type=int,default=5)
     args = parser.parse_args()
 
     file = np.load(args.injectionfile, allow_pickle=True)
@@ -33,7 +33,7 @@ if __name__ == '__main__':
             if vec_result is None:
                 continue
 
-            chi2_result = chi2localisation(counts,args.NSIDE,args.panels,args.noise)
+            chi2_result = chi2localisation(counts,args.NSIDE,args.faces,args.noise)
                 
             result_array[i,j,0:3]=chi2_result
             result_array[i,j,3:6]=vec_result
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     filename = (
     f"loc_ndir_{metadata['sources']:05d}"
     f"_ninj_{metadata['injections']:04d}"
-    f"_flu_{metadata['target_fluence']:.0e}"
+    f"_flu_{metadata['input_fluence']:.0e}"
     f"_alpha_{metadata['alpha']:+.2f}"
     f"_beta_{metadata['beta']:+.2f}"
     f"_Ep_{metadata['Ep']:06.2f}"
@@ -57,10 +57,11 @@ if __name__ == '__main__':
                 true_ra=true_GRB_ra,
                 true_dec=true_GRB_dec,
                 results=result_array,
+                processing_time_sec=elapsed_time,
                 metadata=dict(
                     sources=metadata['sources'],
                     injections=metadata['injections'],
-                    target_fluence=metadata['target_fluence'],
+                    input_fluence=metadata['input_fluence'],
                     alpha=metadata['alpha'],
                     beta=metadata['beta'],
                     Ep=metadata['Ep'],

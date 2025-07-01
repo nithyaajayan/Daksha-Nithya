@@ -38,7 +38,7 @@ if __name__ == '__main__':
         chi2_result = chi2localisation(counts, NSIDE, faces, noise)
         return (i, j, chi2_result, vec_result)
 
-    with Pool(args.processes) as pool:
+    with Pool(args.ncores) as pool:
         results = pool.map(wrapper, tasks)
 
     for i, j, chi2_result, vec_result in results:
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     filename = (
         f"loc_ndir_{metadata['sources']:05d}"
         f"_ninj_{metadata['injections']:04d}"
-        f"_flu_{metadata['target_fluence']:.0e}"
+        f"_flu_{metadata['input_fluence']:.0e}"
         f"_alpha_{metadata['alpha']:+.2f}"
         f"_beta_{metadata['beta']:+.2f}"
         f"_Ep_{metadata['Ep']:06.2f}"
@@ -64,14 +64,15 @@ if __name__ == '__main__':
              true_ra=true_GRB_ra,
              true_dec=true_GRB_dec,
              results=result_array,
+             processing_time_sec=elapsed_time,
              metadata=dict(
                  sources=metadata['sources'],
                  injections=metadata['injections'],
-                 target_fluence=metadata['target_fluence'],
+                 input_fluence=metadata['input_fluence'],
                  alpha=metadata['alpha'],
                  beta=metadata['beta'],
                  Ep=metadata['Ep'],
                  noise=args.noise,
                  NSIDE=args.NSIDE,
                  faces=args.faces,
-                 cores=args.processes))
+                 cores=args.ncores))

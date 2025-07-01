@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     fluence_temp = simpson(integrand, E_grid) *args.delT #erg/cm2
 
-    A_scaling = args.targetfluence / fluence_temp
+    A_scaling = args.inputfluence / fluence_temp
     band_counts_new = bandcounts(E_grid,A_scaling,args.alpha,args.beta,args.Ep)
 
     photons = simpson(band_counts_new,E_grid) *area *args.delT
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     filename = (
         f"sim_ndir_{args.sources:05d}"
         f"_ninj_{args.injections:04d}"
-        f"_flu_{args.targetfluence:.0e}"
+        f"_flu_{args.inputfluence:.0e}"
         f"_alpha_{args.alpha:+.2f}"
         f"_beta_{args.beta:+.2f}"
         f"_Ep_{args.Ep:06.2f}.npz")
@@ -58,6 +58,6 @@ if __name__ == "__main__":
                              Ep=args.Ep,
                              delT=args.delT,
                              area=area,
-                             target_fluence=args.targetfluence,
+                             input_fluence=args.inputfluence,
                              photons=photons))
 
