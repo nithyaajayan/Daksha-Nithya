@@ -40,6 +40,7 @@ if __name__ == '__main__':
             result_array[i,j,3:6]=vec_result
     
     endtime=time.time()
+    elapsed_time = endtime-starttime
 
     filename = (
     f"loc_ndir_{metadata['sources']:05d}"
@@ -51,6 +52,7 @@ if __name__ == '__main__':
     f"_NSIDE_{args.NSIDE}"
     f"_faces_{args.faces:02d}.npz"
     )
+    print(f"Finished localisation. Total processing time: {elapsed_time} seconds.")
 
     np.savez(filename,
                 true_ra=true_GRB_ra,

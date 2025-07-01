@@ -1,6 +1,7 @@
 import numpy as np
 import argparse
 import sys, os
+import time 
 from multiprocessing import Pool
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -29,6 +30,7 @@ if __name__ == '__main__':
     index_pairs = list(np.ndindex(num_sources, num_injections))
     tasks = [(i, j, data[i, j, :], args.NSIDE, args.faces, args.noise) for i, j in index_pairs]
 
+    starttime = time.time()
 
     def wrapper(args_tuple):
         i, j, counts, NSIDE, faces, noise = args_tuple
@@ -37,11 +39,14 @@ if __name__ == '__main__':
         return (i, j, chi2_result, vec_result)
 
     with Pool(args.processes) as pool:
-        results = pool.starmap(wrapper, tasks)
+        results = pool.map(wrapper, tasks)
 
     for i, j, chi2_result, vec_result in results:
         result_array[i, j, 0:3] = chi2_result
         result_array[i, j, 3:6] = vec_result
+
+    endtime=time.time()
+    elapsed_time = endtime-starttime
 
     filename = (
         f"loc_ndir_{metadata['sources']:05d}"
@@ -53,6 +58,7 @@ if __name__ == '__main__':
         f"_NSIDE_{args.NSIDE}"
         f"_faces_{args.faces:02d}.npz"
     )
+    print(f"Finished localisation. Total processing time: {elapsed_time} seconds.")
 
     np.savez(filename,
              true_ra=true_GRB_ra,
