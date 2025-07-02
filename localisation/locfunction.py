@@ -105,7 +105,7 @@ def chi2localisation(counts_on_17_panels,NSIDE,panels,noise):
     F_at_transient = F_estimate[pix_target]
 
 
-    return float(ra_min),float(dec_min),float(F_at_transient)
+    return float(phi_min),float(theta_min),float(F_at_transient)
 
 
 
@@ -154,10 +154,10 @@ def vectorlocalisation(counts_from_17_panels,noise):
 
     theta_r,phi_r = hp.vec2ang(r_unit)
 
-    ra = np.degrees(phi_r.item())
-    dec= 90 - np.degrees(theta_r.item())
+    phi_min = np.degrees(phi_r.item())
+    theta_min = np.degrees(theta_r.item())
 
-    return ra, dec, np.linalg.norm(r_vec)
+    return phi_min, theta_min, np.linalg.norm(r_vec)
 
 
 def plotdistribution(data1, data2, label1, label2, true_val, title, xlabel,bins):
