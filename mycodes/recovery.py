@@ -1,9 +1,10 @@
 import numpy as np
 import argparse
-import sys, os
+import sys
 import time
+from pathlib import Path
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from localisation.locfunction import chi2localisation,vectorlocalisation
 
@@ -30,9 +31,6 @@ if __name__ == '__main__':
         for j in range(num_injections):
             counts=data[i,j,:]
             vec_result = vectorlocalisation(counts,args.noise)
-            if vec_result is None:
-                continue
-
             chi2_result = chi2localisation(counts,args.NSIDE,args.faces,args.noise)
                 
             result_array[i,j,0:3]=chi2_result
@@ -42,7 +40,7 @@ if __name__ == '__main__':
     elapsed_time = endtime-starttime
 
     filename = (
-    f"loc_ndir_{metadata['sources']:05d}"
+    f"locsin_ndir_{metadata['sources']:05d}"
     f"_ninj_{metadata['injections']:04d}"
     f"_flu_{metadata['input_fluence']:.0e}"
     f"_alpha_{metadata['alpha']:+.2f}"
