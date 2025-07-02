@@ -8,7 +8,7 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from localisation.locfunction import isotropicpoints, observedcounts,bandcounts
+from localisation.locfunctionnew import isotropicpoints, observedcounts,bandcounts
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -77,7 +77,6 @@ if __name__ == "__main__":
                              beta=args.beta,
                              Ep=args.Ep,
                              delT=args.delT,
-                             area=area,
                              input_fluence=args.inputfluence,
                              photons=photons))
 
