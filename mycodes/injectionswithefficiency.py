@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     area = 304
 
-    data = pd.read_csv("Daksha-Nithya/czt.dat", comment='#',
+    data = pd.read_csv("/home/nithya/work/Daksha-Nithya/mycodes/czt.dat", comment='#',
                    sep='\s+', header=None,     
                    names=["Energy_MeV", "Coherent", "Incoherent", "Photoelectric",
                           "PairProd_Nuclear", "PairProd_Electron", "Total_with_Coherent", "Total_wo_Coherent"])
