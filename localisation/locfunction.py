@@ -94,9 +94,13 @@ def chi2localisation(counts_on_17_panels,NSIDE,panels,noise):
         chi_squared_all += ((obs - expected) ** 2) / obs
     
     min_index = np.argmin(chi_squared_all)
-    theta_min, phi_min = hp.pix2ang(NSIDE, min_index)
-    dec_min = 90 - np.degrees(theta_min)
-    ra_min = np.degrees(phi_min)
+    theta_min_r, phi_min_r = hp.pix2ang(NSIDE, min_index)
+
+    theta_min = np.degrees(theta_min_r)
+    phi_min = np.degrees(phi_min_r)
+
+    dec_min = 90 - theta_min
+    ra_min = phi_min
     
     sky_target = SkyCoord(ra=ra_min * u.deg, dec=dec_min * u.deg)
     theta_target = np.radians(90 - sky_target.dec.deg)
@@ -164,11 +168,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 
-def plotdistribution(data, label, title, xlabel,ylabel, bins, fit_gaussian=True):
+def plotdistribution(data, title, xlabel,ylabel, bins, fit_gaussian=True):
     fig, ax = plt.subplots(figsize=(8, 4))
 
     _, bin_edges, _ = ax.hist(data, bins=bins, histtype='step', linewidth=2, color='skyblue', 
-                              density=True, label=label)
+                              density=True)
 
     mean_val = np.mean(data)
     std_val = np.std(data)
