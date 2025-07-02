@@ -160,32 +160,36 @@ def vectorlocalisation(counts_from_17_panels,noise):
     return phi_min, theta_min, np.linalg.norm(r_vec)
 
 
-def plotdistribution(data1, data2, label1, label2, true_val, title, xlabel,bins):
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import norm
+
+def plotdistribution(data, label, title, xlabel,ylabel, bins, fit_gaussian=True):
     fig, ax = plt.subplots(figsize=(8, 4))
 
-    ax.hist(data1, bins=bins, histtype='step', linewidth=2, label=label1, color='skyblue', density=True)
-    ax.hist(data2, bins=bins, histtype='step', linewidth=2, label=label2, color='red', density=True)
+    _, bin_edges, _ = ax.hist(data, bins=bins, histtype='step', linewidth=2, color='skyblue', 
+                              density=True, label=label)
 
-    # Mean
-    ax.axvline(np.mean(data1), color='skyblue', linestyle='--', label=f'{label1} mean={np.mean(data1):.2f}')
-    ax.axvline(np.mean(data2), color='red', linestyle='--', label=f'{label2} mean={np.mean(data2):.2f}')
-    ax.axvline(true_val, color='k', linestyle='-', label='True Value')
+    mean_val = np.mean(data)
+    std_val = np.std(data)
 
-    '''
-    # Gaussian 
-    x_vals = np.linspace(min(data_combined), max(data_combined), 500)
-    ax.plot(x_vals, norm.pdf(x_vals, np.mean(data1), np.std(data1)), 'skyblue', alpha=0.6)
-    ax.plot(x_vals, norm.pdf(x_vals, np.mean(data2), np.std(data2)), 'red', alpha=0.6)
-    '''
-    
+    ax.axvline(mean_val, color='skyblue', linestyle='--', label=f'Mean = {mean_val:.4f}')
+    ax.axvline(0, color='black', linestyle='-', label='Zero Reference')
+
+    if fit_gaussian:
+        x_vals = np.linspace(bin_edges[0], bin_edges[-1], 500)
+        y_vals = norm.pdf(x_vals, mean_val, std_val)
+        ax.plot(x_vals, y_vals, 'r--', label=f'Gaussian Fit\nσ = {std_val:.2e}')
+
     ax.set_title(title)
     ax.set_xlabel(xlabel)
-    ax.set_ylabel("Probability Density")
+    ax.set_ylabel(ylabel)
     ax.legend()
     plt.tight_layout()
     plt.show()
 
     return fig
+
 
 def bandcounts(E, A, alpha, beta, Ep):
 
