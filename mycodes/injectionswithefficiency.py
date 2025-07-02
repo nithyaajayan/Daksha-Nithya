@@ -29,12 +29,17 @@ if __name__ == "__main__":
                    names=["Energy_MeV", "Coherent", "Incoherent", "Photoelectric",
                           "PairProd_Nuclear", "PairProd_Electron", "Total_with_Coherent", "Total_wo_Coherent"])
 
-    mass_thickness_coeff = data["Total_with_Coherent"].to_numpy()
+    mass_thickness_coeff_full = data["Total_with_Coherent"].to_numpy()
     E_MeV = data["Energy_MeV"].to_numpy()
 
-    E_grid = E_MeV*1000
+    E_grid_full = E_MeV*1000
+    req = (E_grid_full >= 20) & (E_grid_full <= 200)
+
+    E_grid = E_grid_full[req]
+    mass_thickness_coeff = mass_thickness_coeff_full[req]
+
     density=5.78
-    thickness = 1
+    thickness = 0.5
     linear_att = mass_thickness_coeff*density*thickness
 
     eff = 1 - np.exp((-1)*linear_att)
@@ -73,6 +78,6 @@ if __name__ == "__main__":
                              Ep=args.Ep,
                              delT=args.delT,
                              area=area,
-                             target_fluence=args.inputfluence,
+                             input_fluence=args.inputfluence,
                              photons=photons))
 
