@@ -1,10 +1,12 @@
 import numpy as np
 import argparse
-import sys, os
+import sys
 import time 
 from multiprocessing import Pool
+from pathlib import Path
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 from localisation.locfunction import chi2localisation, vectorlocalisation
 
 if __name__ == '__main__':
@@ -49,7 +51,7 @@ if __name__ == '__main__':
     elapsed_time = endtime-starttime
 
     filename = (
-        f"loc_ndir_{metadata['sources']:05d}"
+        f"locmul_ndir_{metadata['sources']:05d}"
         f"_ninj_{metadata['injections']:04d}"
         f"_flu_{metadata['input_fluence']:.0e}"
         f"_alpha_{metadata['alpha']:+.2f}"
