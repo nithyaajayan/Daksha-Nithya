@@ -196,7 +196,7 @@ def plotdistribution(data, title, xlabel, ylabel, param):
         bins = np.arange(-50.5, 50.6, 5)
         bins_cen = (bins[:-1] + bins[1:]) / 2
 
-    ax.hist(data, bins=bins, histtype='step', color='skyblue', alpha=0.4, density=True, label='Histogram')
+    ax.hist(data, bins=bins, histtype='step', color='skyblue', density=True)
 
     counts, _ = np.histogram(data, bins=bins)
     total_counts = simpson(counts, bins_cen)
