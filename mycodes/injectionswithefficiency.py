@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     area = 304
     inputfluence=args.inputfluence
-    fluence_folder = f"flu_{inputfluence:.0e}"  # Converts 1e-6 to 'flu_1e-6'
+    fluence_folder = f"flu_{inputfluence:.0e}"  
     base_path = Path.cwd() / 'data' / fluence_folder
     base_path.mkdir(parents=True, exist_ok=True)
 
@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
     filename = (
         f"sim_ndir_{args.sources:05d}"
-        f"_ninj_{args.injections:04d}"
+        f"_ninj_{args.injections:05d}"
         f"_flu_{args.inputfluence:.0e}"
         f"_alpha_{args.alpha:+.2f}"
         f"_beta_{args.beta:+.2f}"
