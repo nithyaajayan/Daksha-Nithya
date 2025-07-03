@@ -4,6 +4,8 @@ from astropy.coordinates import SkyCoord
 import healpy as hp
 from scipy.stats import norm
 import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+from scipy.integrate import simpson
 
 def isotropicpoints(n):
     GRB_ra_list =[]
@@ -177,14 +179,8 @@ def vectorlocalisation(counts_from_17_panels,noise):
     return phi_min, theta_min, np.linalg.norm(r_vec)
 
 
-from scipy.optimize import curve_fit
-from scipy.integrate import simpson
-from scipy.stats import norm
-import matplotlib.pyplot as plt
-import numpy as np
-
-def gaussian(x, A, mu, sigma):
-    return A * np.exp(-0.5 * ((x - mu) / sigma)**2)
+def gaussian(x, mu, sigma):
+    return (1/(sigma*np.sqrt(2*np.pi))) * np.exp(-0.5 * ((x - mu) / sigma)**2)
 
 def plotdistribution(data, title, xlabel, ylabel, param):
     fig, ax = plt.subplots(figsize=(8, 4))
@@ -196,7 +192,6 @@ def plotdistribution(data, title, xlabel, ylabel, param):
         bins = np.arange(-50.5, 50.6, 5)
         bins_cen = (bins[:-1] + bins[1:]) / 2
 
-    ax.hist(data, bins=bins, histtype='step', color='skyblue', density=True)
 
     counts, _ = np.histogram(data, bins=bins)
     total_counts = simpson(counts, bins_cen)
@@ -204,17 +199,18 @@ def plotdistribution(data, title, xlabel, ylabel, param):
 
     errors = np.sqrt(counts) / total_counts
 
-    ax.errorbar(bins_cen, norm_counts, yerr=errors, fmt='o', color='red', label='Data')
+    ax.errorbar(bins_cen, norm_counts, yerr=errors, fmt='o', color='skyblue', label='Data',ds='steps-mid')
 
-    ax.axvline(np.median(data), color='red', linestyle='--', label=f'Median = {np.median(data):.4f}')
-    ax.axvline(0, color='black', linestyle='-', label='Zero Reference')
-
-    p0 = [np.max(norm_counts), np.mean(data), np.std(data)]
+    p0 = [np.mean(data), np.std(data)]
 
     popt, pcov = curve_fit(gaussian, bins_cen, norm_counts, p0=p0, sigma=errors, absolute_sigma=True)
+
+    ax.axvline(popt[1], color='red', linestyle='--', label=f'Fit Mean = {popt[1]:.4f}')
+    ax.axvline(0, color='black', linestyle='-', label='Zero Reference')
+
     x_vals = np.linspace(bins[0], bins[-1], 500)
     y_vals = gaussian(x_vals, *popt)
-    ax.plot(x_vals, y_vals, 'r--', label=f'Gaussian Fit mu={popt[1]:.2f}, sigma={popt[2]:.2f}')
+    ax.plot(x_vals, y_vals, 'r--', label=f'Gaussian Fit mu={popt[0]:.2f}, sigma={popt[1]:.2f}')
 
     ax.set_title(title)
     ax.set_xlabel(xlabel)
