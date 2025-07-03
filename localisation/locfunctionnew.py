@@ -177,26 +177,44 @@ def vectorlocalisation(counts_from_17_panels,noise):
     return phi_min, theta_min, np.linalg.norm(r_vec)
 
 
-import numpy as np
-import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+from scipy.integrate import simpson
 from scipy.stats import norm
+import matplotlib.pyplot as plt
+import numpy as np
 
-def plotdistribution(data, title, xlabel,ylabel, bins, fit_gaussian=True):
+def gaussian(x, A, mu, sigma):
+    return A * np.exp(-0.5 * ((x - mu) / sigma)**2)
+
+def plotdistribution(data, title, xlabel, ylabel, param):
     fig, ax = plt.subplots(figsize=(8, 4))
 
-    _, bin_edges, _ = ax.hist(data, bins=bins, histtype='step', linewidth=2, color='skyblue', 
-                              density=True)
+    if param == 'ang':
+        bins = np.arange(-10.5, 10.6, 1)
+        bins_cen = (bins[:-1] + bins[1:]) / 2
+    else:
+        bins = np.arange(-50.5, 50.6, 5)
+        bins_cen = (bins[:-1] + bins[1:]) / 2
 
-    mean_val = np.mean(data)
-    std_val = np.std(data)
+    ax.hist(data, bins=bins, histtype='step', color='skyblue', alpha=0.4, density=True, label='Histogram')
 
-    ax.axvline(mean_val, color='skyblue', linestyle='--', label=f'Mean = {mean_val:.4f}')
+    counts, _ = np.histogram(data, bins=bins)
+    total_counts = simpson(counts, bins_cen)
+    norm_counts = counts / total_counts
+
+    errors = np.sqrt(counts) / total_counts
+
+    ax.errorbar(bins_cen, norm_counts, yerr=errors, fmt='o', color='red', label='Data')
+
+    ax.axvline(np.median(data), color='red', linestyle='--', label=f'Median = {np.median(data):.4f}')
     ax.axvline(0, color='black', linestyle='-', label='Zero Reference')
 
-    if fit_gaussian:
-        x_vals = np.linspace(bin_edges[0], bin_edges[-1], 500)
-        y_vals = norm.pdf(x_vals, mean_val, std_val)
-        ax.plot(x_vals, y_vals, 'r--', label=f'Gaussian Fit\nσ = {std_val:.2e}')
+    p0 = [np.max(norm_counts), np.mean(data), np.std(data)]
+
+    popt, pcov = curve_fit(gaussian, bins_cen, norm_counts, p0=p0, sigma=errors, absolute_sigma=True)
+    x_vals = np.linspace(bins[0], bins[-1], 500)
+    y_vals = gaussian(x_vals, *popt)
+    ax.plot(x_vals, y_vals, 'r--', label=f'Gaussian Fit mu={popt[1]:.2f}, sigma={popt[2]:.2f}')
 
     ax.set_title(title)
     ax.set_xlabel(xlabel)
