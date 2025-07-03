@@ -23,6 +23,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     area = 304
+    inputfluence=args.inputfluence
+    fluence_folder = f"flu_{inputfluence:.0e}"  # Converts 1e-6 to 'flu_1e-6'
+    base_path = Path.cwd() / 'data' / fluence_folder
+    base_path.mkdir(parents=True, exist_ok=True)
 
     data = pd.read_csv("/home/nithya/work/Daksha-Nithya/mycodes/czt.dat", comment='#',
                    sep='\s+', header=None,     
@@ -69,7 +73,7 @@ if __name__ == "__main__":
         f"_beta_{args.beta:+.2f}"
         f"_Ep_{args.Ep:06.2f}.npz")
 
-    np.savez(filename, ra=GRB_ra_array,dec=GRB_dec_array,counts=injection_array,
+    np.savez(base_path/filename, ra=GRB_ra_array,dec=GRB_dec_array,counts=injection_array,
              metadata = dict(sources=args.sources,
                              injections=args.injections,
                              bkg=args.bkg,
