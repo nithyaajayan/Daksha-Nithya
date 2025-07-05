@@ -19,18 +19,16 @@ if __name__ == '__main__':
     parser.add_argument("--ncores", type=int, default=10)
     args = parser.parse_args()
 
+    injectionfile_path = Path(args.injectionfile).resolve()
+    base_path = injectionfile_path.parent
+    base_path.mkdir(parents=True,exist_ok=True)
+
     file = np.load(args.injectionfile, allow_pickle=True)
     metadata = file['metadata'].item()
 
     data = file['counts']
     true_GRB_ra = file['ra']
     true_GRB_dec = file['dec']
-
-    input_fluence = metadata['input_fluence']
-    fluence_folder = f"flu_{input_fluence:.0e}"
-    base_path = Path.cwd() / 'data' / fluence_folder
-
-    base_path.mkdir(parents=True,exist_ok=True)
 
     num_sources, num_injections, _ = data.shape
     result_array = np.zeros((num_sources, num_injections, 6))
@@ -80,7 +78,7 @@ if __name__ == '__main__':
                  alpha=metadata['alpha'],
                  beta=metadata['beta'],
                  Ep=metadata['Ep'],
-                 input_fluence=input_fluence,
+                 input_fluence=metadata['input_fluence'],
                  photons=metadata['photons'],
                  noise=args.noise,
                  NSIDE=args.NSIDE,
