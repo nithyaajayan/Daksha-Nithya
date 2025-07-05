@@ -51,8 +51,6 @@ def observedcounts(GRB_RA,GRB_Dec,normalflux,noise):
 
     return observed
 
-
-
 def chi2localisation(counts_on_17_panels,NSIDE,panels,noise):
 
     panel_orient_list = [[0, 0], [45, 0], [45, 90], [45, 180], [45, 270], 
@@ -182,39 +180,47 @@ def vectorlocalisation(counts_from_17_panels,noise):
 def gaussian(x, mu, sigma):
     return (1/(sigma*np.sqrt(2*np.pi))) * np.exp(-0.5 * ((x - mu) / sigma)**2)
 
-def plotdistribution(data, title, xlabel, ylabel, param):
+def plotdistribution(data, param,true_val,method):
     fig, ax = plt.subplots(figsize=(8, 4))
 
-    if param == 'ang':
-        bins = np.arange(-10.5, 10.6, 1)
+    if (param == "phi"):
+        bins = np.arange(-5.5, 5.6, 0.5)
         bins_cen = (bins[:-1] + bins[1:]) / 2
-    else:
-        bins = np.arange(-50.5, 50.6, 5)
+    if (param=="theta"):
+        bins = np.arange(-5.5, 5.6, 0.5)
+        bins_cen = (bins[:-1] + bins[1:]) / 2
+    if (param=="fluence"):
+        bins = np.arange(-150.5, 150.6, 5)
         bins_cen = (bins[:-1] + bins[1:]) / 2
 
+    data = data[~np.isnan(data)]
+
+    bins_cen += np.median(data)
+    bins += np.median(data)
 
     counts, _ = np.histogram(data, bins=bins)
+
     total_counts = simpson(counts, bins_cen)
     norm_counts = counts / total_counts
 
     errors = np.sqrt(counts) / total_counts
 
-    ax.errorbar(bins_cen, norm_counts, yerr=errors, fmt='o', color='skyblue', label='Data',ds='steps-mid')
+    ax.errorbar(bins_cen, norm_counts, yerr=errors, color='skyblue', label='Data',ds='steps-mid')
 
-    p0 = [np.mean(data), np.std(data)]
+    p0 = [np.median(data), np.std(data)]
 
     popt, pcov = curve_fit(gaussian, bins_cen, norm_counts, p0=p0, sigma=errors, absolute_sigma=True)
 
-    ax.axvline(popt[1], color='red', linestyle='--', label=f'Fit Mean = {popt[1]:.4f}')
-    ax.axvline(0, color='black', linestyle='-', label='Zero Reference')
+    ax.axvline(popt[0], color='red', linestyle='--')
+    ax.axvline(true_val, color='black', linestyle='-', label='True Value')
 
-    x_vals = np.linspace(bins[0], bins[-1], 500)
-    y_vals = gaussian(x_vals, *popt)
-    ax.plot(x_vals, y_vals, 'r--', label=f'Gaussian Fit mu={popt[0]:.2f}, sigma={popt[1]:.2f}')
+    y_vals = gaussian(bins_cen, *popt)
+    ax.plot(bins_cen, y_vals, 'r--')
 
+    title = f"Injected {method} {param}: {true_val:.4f} $\mu$={popt[0]:.2f}, $\sigma$={popt[1]:.2f}"
     ax.set_title(title)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
+    ax.set_xlabel(f"{param}")
+    ax.set_ylabel("Normalised Counts")
     ax.legend()
     plt.tight_layout()
     plt.show()
