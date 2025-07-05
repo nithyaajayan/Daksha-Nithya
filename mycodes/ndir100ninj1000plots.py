@@ -19,33 +19,37 @@ meta=injdata['metadata'].item()
 true_fluence=meta["photons"].item()
 
 
-with PdfPages("sourcewise_differences_new.pdf") as pdf:
-    for source in range(3):
+with PdfPages("sourcewise_errorplots.pdf") as pdf:
+    for source in range(2):
         injected = results[source, :, :]
         true_phi = true_phi_array[source]
         true_theta = true_theta_array[source]
 
-        diffs = {
-            "Theta Chi2 Error": true_theta - injected[:, 1],
-            "Phi Chi2 Error": true_phi - injected[:, 0],
-            "Fluence Chi2 Error": true_fluence - injected[:, 2],
-            "Theta Vector Error": true_theta - injected[:, 4],
-            "Phi Vector Error": true_phi - injected[:, 3],
-            "Fluence Vector Error": true_fluence - injected[:, 5],
-        }
+        isnan=0
+        for i in range(6):
+            if (~np.isnan(injected[:,i])).sum()/injected[:,i].size > 0.5:
+                isnan+=1
+            
+        if isnan!=6:
+            continue
 
-        for i, (title, diff) in enumerate(diffs.items()):
-            if (i+1)%3==0:
-                param='flu'
+        for i in range(6):
+            if (i%3== 0):
+                param="phi"
+                true_val= true_phi
+            if (i%3==1):
+                param="theta"
+                true_val=true_theta
+            if (i%3==2):
+                param="fluence"
+                true_val=true_fluence
+
+            if i<3:
+                method='chi'
             else:
-                param='ang'
-            if not np.all(np.isnan(diff)):
-                fig = plotdistribution(
-                    data=diff[~np.isnan(diff)],
-                    title=f"Source {source+1} — {title}",
-                    xlabel=title.split(':')[0],
-                    ylabel="Normalized Count",
-                    param=param
-                )
-                pdf.savefig(fig)
-                plt.close(fig)
+                method='vector'
+
+            data = injected[:,i]
+            fig = plotdistribution(data=data,param=param,true_val=true_val,method=method)
+            pdf.savefig(fig)
+            plt.close(fig)
