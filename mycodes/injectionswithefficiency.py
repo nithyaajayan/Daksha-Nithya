@@ -25,8 +25,10 @@ if __name__ == "__main__":
     area = 304
     inputfluence=args.inputfluence
     fluence_folder = f"flu_{inputfluence:.0e}"  
-    base_path = Path(__file__).resolve().parent.parent.parent / 'Daksha-Nithya' / 'mycodes' / 'data' / fluence_folder
+    base_path = Path(__file__).resolve().parent.parent.parent / 'data' / fluence_folder
     base_path.mkdir(parents=True, exist_ok=True)
+
+    base_path.mkdir(parents=True,exist_ok=True)
 
     data = pd.read_csv("/home/nithya/work/Daksha-Nithya/mycodes/czt.dat", comment='#',
                    sep='\s+', header=None,     
