@@ -207,7 +207,7 @@ def plotdistribution(data, param,true_val,method):
 
     ax.errorbar(bins_cen, norm_counts, yerr=errors, color='skyblue', label='Data',ds='steps-mid')
 
-    p0 = [np.median(data), np.std(data)]
+    p0 = [np.mean(data), np.std(data)]
 
     popt, pcov = curve_fit(gaussian, bins_cen, norm_counts, p0=p0, sigma=errors, absolute_sigma=True)
 
