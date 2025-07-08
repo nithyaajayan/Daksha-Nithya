@@ -4,8 +4,6 @@ from collections import defaultdict
 from scipy.optimize import curve_fit
 from scipy.integrate import simpson
 import healpy as hp
-from matplotlib.backends.backend_pdf import PdfPages
-import matplotlib.pyplot as plt
 
 NSIDE = 16
 NPIX = hp.nside2npix(NSIDE)
