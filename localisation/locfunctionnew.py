@@ -51,62 +51,49 @@ def observedcounts(GRB_RA,GRB_Dec,normalflux,noise):
 
     return observed
 
-def chi2localisation(counts_on_17_panels,NSIDE,panels,noise):
+from astropy.coordinates import SkyCoord
+import astropy.units as u
+import healpy as hp
+import numpy as np
 
-    panel_orient_list = [[0, 0], [45, 0], [45, 90], [45, 180], [45, 270], 
-    [90, 0], [90, 45], [90, 90], [90, 135], [90, 180], [90, 225], [90, 270], [90, 315], 
-    [180, 45], [180, 135], [180, 225], [180, 315]]
-    n=5
+def chi2localisation(counts_on_17_panels, NSIDE, panels, noise):
     
+    panel_orient_list = [[0, 0], [45, 0], [45, 90], [45, 180], [45, 270], 
+                         [90, 0], [90, 45], [90, 90], [90, 135], [90, 180], 
+                         [90, 225], [90, 270], [90, 315], 
+                         [180, 45], [180, 135], [180, 225], [180, 315]]
+
     all_sources = counts_on_17_panels - noise
-    all_sources[all_sources<0]=0
+    all_sources[all_sources < 0] = np.nan
 
     top_indices = np.argsort(-all_sources)[:panels]
     top_sources = all_sources[top_indices]
     top_panels = np.array([panel_orient_list[i] for i in top_indices])
 
-    NPIX=hp.nside2npix(NSIDE)
-    theta_sky,phi_sky = hp.pix2ang(NSIDE, np.arange(NPIX))
+    NPIX = hp.nside2npix(NSIDE)
+    theta_sky, phi_sky = hp.pix2ang(NSIDE, np.arange(NPIX))
     ra_sky = np.degrees(phi_sky)
-    dec_sky=90-np.degrees(theta_sky)
+    dec_sky = 90 - np.degrees(theta_sky)
 
-    sky_coords = SkyCoord(ra=ra_sky*u.deg,dec=dec_sky*u.deg)
-    panel_coords = SkyCoord(ra=top_panels[:,1]*u.deg,dec=(90-top_panels[:,0])*u.deg)
+    sky_coords = SkyCoord(ra=ra_sky * u.deg, dec=dec_sky * u.deg)
+    panel_coords = SkyCoord(ra=top_panels[:, 1]*u.deg, dec=(90 - top_panels[:, 0]) * u.deg)
 
-    gamma_matrix = sky_coords.separation(panel_coords[:, None]).deg
-
-    cos_gamma_matrix = np.cos(np.radians(gamma_matrix))
-    cos_gamma_matrix[cos_gamma_matrix < 0] = np.nan
-
-    # Estimate F
-    sum_cos_gamma = np.sum(cos_gamma_matrix, axis=0)
-    total_counts = np.nansum(top_sources)  
-    with np.errstate(divide='ignore', invalid='ignore'):
-        F_estimate = total_counts / sum_cos_gamma
-
-    avg_F = np.nanmean(F_estimate)
-
-    # Initialize final chi-squared map
-    chi_squared_all = np.zeros((NPIX))
-
-
-    for i in range(n):
-        theta_panel, phi_panel = top_panels[i]
-        obs = top_sources[i]
-
-        panel_dec = 90 - theta_panel
-        panel_ra = phi_panel
-
-        panel_coord = SkyCoord(ra=panel_ra * u.deg, dec=panel_dec * u.deg)
-        gamma = sky_coords.separation(panel_coord).deg
-        cos_gamma = np.cos(np.radians(gamma))
-        #cos_gamma[cos_gamma < 0] = np.nan
-
-        expected = avg_F * cos_gamma
-
-        chi_squared_all += ((obs - expected) ** 2) / obs
+    gamma_matrix = panel_coords[:,None].separation(sky_coords).deg
     
-    min_index = np.argmin(chi_squared_all)
+    cos_gamma_matrix = np.cos(np.radians(gamma_matrix))
+    cos_gamma_matrix[cos_gamma_matrix < 0] = np.nan  
+
+    sum_cos_gamma = np.nansum(cos_gamma_matrix, axis=0)
+    total_counts = np.nansum(top_sources)
+
+    with np.errstate(divide='ignore', invalid='ignore'):
+        F_estimates = total_counts / sum_cos_gamma  #(NPIX,)
+
+    expected_all = F_estimates * cos_gamma_matrix
+
+    chi_squared_all = np.nansum(((top_sources[:, None] - expected_all) ** 2) / top_sources[:, None], axis=0)
+
+    min_index = np.nanargmin(chi_squared_all)
     theta_min_r, phi_min_r = hp.pix2ang(NSIDE, min_index)
 
     theta_min = np.degrees(theta_min_r)
@@ -114,15 +101,10 @@ def chi2localisation(counts_on_17_panels,NSIDE,panels,noise):
 
     dec_min = 90 - theta_min
     ra_min = phi_min
-    
-    sky_target = SkyCoord(ra=ra_min * u.deg, dec=dec_min * u.deg)
-    theta_target = np.radians(90 - sky_target.dec.deg)
-    phi_target = np.radians(sky_target.ra.deg)
-    pix_target = hp.ang2pix(NSIDE, theta_target, phi_target)
-    F_at_transient = F_estimate[pix_target]
 
+    F_at_transient = F_estimates[min_index]
 
-    return float(phi_min),float(theta_min),float(F_at_transient)
+    return float(ra_min), float(dec_min), float(F_at_transient)
 
 
 
@@ -184,10 +166,10 @@ def plotdistribution(data, param,true_val,method):
     fig, ax = plt.subplots(figsize=(8, 4))
 
     if (param == "phi"):
-        bins = np.arange(-5.5, 5.6, 0.5)
+        bins = np.arange(-10, 10.1, 0.5)
         bins_cen = (bins[:-1] + bins[1:]) / 2
     if (param=="theta"):
-        bins = np.arange(-5.5, 5.6, 0.5)
+        bins = np.arange(-10, 10.1, 0.5)
         bins_cen = (bins[:-1] + bins[1:]) / 2
     if (param=="fluence"):
         bins = np.arange(-150.5, 150.6, 5)
